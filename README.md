@@ -20,8 +20,7 @@ This project is an AI-driven food ordering system that allows users to place ord
 - **Dependencies:**
   - Flask
   - Flask-CORS
-  - Transformers (for the AI model)
-  - PyTorch (for running the AI model)
+  - meta_ai_api (for the AI model)
 
 ## Setup Instructions
 
