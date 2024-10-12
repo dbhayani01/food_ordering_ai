@@ -21,7 +21,8 @@ menu = {
 def extract_order_with_model(user_input):
     # Prepare the input for the model
     ai = MetaAI()
-    m_input = f"give me json structure without any text in front or after it, from this order details: {user_input} only provide json structure with field visible in input don't add anything else, it should be having name,quantity only in list of dictionaries thats it and menu items are {menu.keys()} so map accordingly"
+    m_input = f"Provide a JSON structure without any text before or after it, based solely on these order details: {user_input}. The JSON should only contain a list of dictionaries with the fields 'name' and 'quantity'. Map the items accordingly to the menu: {menu.keys()}."
+    # m_input = f"give me json structure without any text in front or after it, from this order details: {user_input} only provide json structure with field visible in input don't add anything else, it should be having name,quantity only in list of dictionaries thats it and menu items are {menu.keys()} so map accordingly"
     response = ai.prompt(message=m_input)
     # print(response['message'])
     return parse_order(response['message'])
