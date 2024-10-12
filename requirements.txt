@@ -1,0 +1,3 @@
+Flask
+flask-cors
+meta_ai_api

@@ -41,7 +41,7 @@ function App() {
       });
 
       const data = await res.json();
-
+      
       if (res.ok) {
         const formattedResponse = formatOrderResponse(data);
         setMessages((prevMessages) => [
@@ -65,13 +65,14 @@ function App() {
 
   // Function to format the order response from the server
   const formatOrderResponse = (data) => {
+    
     const { message, items, total } = data;
 
     let formattedMessage = `${message}\n\nHere are the items you ordered:\n`;
     items.forEach((item, index) => {
-      formattedMessage += `${index + 1}. ${item.name} - ${item.quantity} - $${item.price.toFixed(2)}\n`;
+      formattedMessage += `${item.quantity}-> ${item.name} , \n`;
     });
-    formattedMessage += `\nTotal: $${total.toFixed(2)}`;
+    formattedMessage += `\nTotal: ${total}`;
 
     return formattedMessage;
   };
