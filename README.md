@@ -16,7 +16,7 @@ This project is an AI-driven food ordering system that allows users to place ord
 
 - **Frontend:** React
 - **Backend:** Flask
-- **AI Model:** GPT-2 (or another suitable generative AI model)
+- **AI Model:** llama latest
 - **Dependencies:**
   - Flask
   - Flask-CORS
