@@ -1,0 +1,45 @@
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+venv/
+env/
+fo_ai/
+pip-log.txt
+pytest_cache/
+.pytest_cache/
+
+# macOS specific
+.DS_Store
+
+# Windows specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Node.js specific (for React)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Build and cache directories (React)
+build/
+dist/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Miscellaneous
+.vscode/
+.idea/
+*.swp
+*.swo
