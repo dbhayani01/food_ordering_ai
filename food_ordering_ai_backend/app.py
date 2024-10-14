@@ -3,11 +3,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from meta_ai_api import MetaAI
 
-
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-
-
+CORS(app)
 
 # Sample menu for pricing
 menu = {
@@ -19,51 +16,59 @@ menu = {
 }
 
 def extract_order_with_model(user_input):
-    # Prepare the input for the model
     ai = MetaAI()
-    m_input = f"Provide a JSON structure without any text before or after it, based solely on these order details: {user_input}. The JSON should only contain a list of dictionaries with the fields 'name' and 'quantity'. Map the items accordingly to the menu: {menu.keys()}."
-    # m_input = f"give me json structure without any text in front or after it, from this order details: {user_input} only provide json structure with field visible in input don't add anything else, it should be having name,quantity only in list of dictionaries thats it and menu items are {menu.keys()} so map accordingly"
+    m_input = f"Extract order details from the following input: '{user_input}'. Provide a JSON structure without any text in front or after it containing a list of dictionaries with the fields 'name' and 'quantity' based on the menu: {menu.keys()}, if you are able to extract order details just share the JSON just a list of order items ,as i can directly process it."
     response = ai.prompt(message=m_input)
-    # print(response['message'])
+    print(response['message'])
     return parse_order(response['message'])
- 
 
 def parse_order(generated_text):
-    # A simple parsing logic to convert model output into order items
-    order_details = json.loads(generated_text)
-    
-    order_details = order_details['order'] if 'order' in order_details else order_details
-    order_details = order_details['items'] if 'items' in order_details else order_details
-    # This should be replaced with actual parsing logic based on model output
-    return order_details if type(order_details) == list else []
-
-@app.route('/order', methods=['POST'])
-def order():
-    data = request.json
-    user_input = data.get("input", "")
-    
-    # Get order items using the model
-    order_items = extract_order_with_model(user_input)
-    
     try:
-        # Calculate total
-        total = 0
-        order_items = [order for order in order_items if order['name'].lower() in menu]
+        order_details = json.loads(generated_text)
+        # order_details = order_details.get('order', order_details)
+        # order_details = order_details.get('items', order_details)
+        return order_details if isinstance(order_details, list) else []
+    except json.JSONDecodeError:
+        return []  # Return an empty list if parsing fails
+
+@app.route('/conversation', methods=['POST'])
+def conversation():
+    data = request.json
+    user_input = data.get("input", "").strip()
+
+    # Send user input to the AI for processing
+    ai = MetaAI()
+    # response = ai.prompt(message=f"Respond to the following input as food ordering bot and stay in content to taking food orders and decline other questions politely and if they ask for a menu here it is {menu}: '{user_input}'. Include any order details if applicable.")
+    # Enhanced prompt for the AI to behave as a food ordering bot
+    prompt_message = (
+        "You are a food ordering bot. Your primary function is to assist users in placing food orders. "
+        "Please only focus on food-related questions and politely decline any unrelated inquiries. "
+        "If the user asks for the menu, respond with the following items: " + ', '.join(menu.keys()) + ". "
+        "You should remember the user's order until they confirm it. "
+        "Once confirmend and placed just share him the total no payment or checkout needs to be done"
+        "User input: '{}'"
+    ).format(user_input)
+    response = ai.prompt(message=prompt_message)
+    if response['message']:  # Check if there's a generated response
+        order_items = extract_order_with_model(user_input)
+
+        if order_items:  # If valid order details were extracted
+            total = sum(menu[item['name'].lower()] * item['quantity'] for item in order_items if item['name'].lower() in menu)
+            order_confirmation_message = f"{response['message']} Thanks for your order! Your total is ${total:.2f}."
+            return jsonify({
+                "message": order_confirmation_message,
+                "items": order_items,
+                "total": f"${total:.2f}"
+            })
         
-        total = sum(menu[item['name'].lower()]  * item['quantity'] for item in order_items )
-        print(total)
-    except KeyError:
+        # If no order details, just return the AI's response
         return jsonify({
-        "message":"Error in placing the order",
-        "order": [],
-        "total": 0
-    })
+            "message": response['message']
+        })
     
-    # Return response
+    # Default response if AI fails to generate a valid response
     return jsonify({
-        "message": "Thanks for the order",
-        "items": order_items,
-        "total": f"${total:.2f}"
+        "message": "I'm not able to process that right now. Please try asking about the menu or placing an order."
     })
 
 if __name__ == '__main__':
